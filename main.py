@@ -2,11 +2,11 @@ import streamlit as st
 import pandas as pd
 import joblib as jb
 
-water_model = jb.load(r'C:\Users\Akshat\Downloads\Project\water_model.pkl')
-water_features = jb.load(r'c:\Users\Akshat\Downloads\Project\water_features.pkl')
+water_model = jb.load(r'#enter your path')
+water_features = jb.load(r'#enter your path')
 
-electricity_model = jb.load(r'C:\Users\Akshat\Downloads\Project\electricity_model.pkl')
-electricity_features = jb.load(r'C:\Users\Akshat\Downloads\Project\electric_features.pkl')
+electricity_model = jb.load(r'#enter your path')
+electricity_features = jb.load(r'#enter your path')
 
 st.title("Utility Usage Prediction System")
 
@@ -66,3 +66,4 @@ else:
         prediction = electricity_model.predict(new_data)[0]
 
         st.success(f"Predicted Electricity Usage: {prediction:.2f} kWh")
+
