@@ -1,24 +1,30 @@
 import streamlit as st
 import pandas as pd
 import joblib as jb
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-water_model = jb.load(r'#enter your path')
-water_features = jb.load(r'#enter your path')
 
-electricity_model = jb.load(r'#enter your path')
-electricity_features = jb.load(r'#enter your path')
+water_model = jb.load(r"#enter your path here")
+water_features = jb.load(r"#enter your path here")
 
-st.title("Utility Usage Prediction System")
+electricity_model = jb.load(r"#enter your path here")
+electricity_features = jb.load(r"#enter your path here")
+
+st.set_page_config(page_title="Utility Usage Prediction", layout="centered")
+st.title("Sustainable Utility Usage Prediction System")
 
 
 prediction_type = st.selectbox(
-    "Select what you want to predict:",
+    "What do you want to predict?",
     ["Water Usage", "Electricity Usage"]
 )
+
 st.divider()
 
+
 if prediction_type == "Water Usage":
-    st.subheader("Water Usage Prediction")
+    st.subheader("🚿 Water Usage Prediction")
 
     occ_01 = st.selectbox("Person 1 Present?", ["Occupied", "Not Occupied"])
     occ_02 = st.selectbox("Person 2 Present?", ["Occupied", "Not Occupied"])
@@ -37,20 +43,41 @@ if prediction_type == "Water Usage":
 
         prediction = water_model.predict(new_data)[0]
 
-        st.success(f"Predicted Water Usage: {prediction:.2f} liters")
+        
+        typical_water = 500  # liters (reasonable reference value)
+
+        st.success(f"Predicted Water Usage: **{prediction:.2f} liters**")
+
+        
+        fig, ax = plt.subplots()
+        sns.barplot(
+            x=["Typical Usage", "Your Predicted Usage"],
+            y=[typical_water, prediction],
+            ax=ax
+        )
+        ax.set_ylabel("Liters")
+        ax.set_title("Water Usage Comparison")
+
+        st.pyplot(fig)
+
+        if prediction > typical_water:
+            st.warning("Your water usage is higher than typical households.")
+        else:
+            st.success("Your water usage is within normal limits.")
+
 
 else:
-    st.subheader("Electricity Usage Prediction")
+    st.subheader("⚡ Electricity Usage Prediction")
 
-    building = st.selectbox(
-        "Select Building",
-        sorted([col.replace("building_", "") 
-                for col in electricity_features if col.startswith("building_")])
+    building_list = sorted(
+        [col.replace("building_", "")
+         for col in electricity_features if col.startswith("building_")]
     )
 
+    building = st.selectbox("Select Building", building_list)
     occupied = st.selectbox("Is the house occupied?", ["Yes", "No"])
-    hour = st.slider("Hour of the day", 0, 23, 18)
-    day_of_week = st.slider("Day of week (0=Mon, 6=Sun)", 0, 6, 3)
+    hour = st.slider("Hour of the Day", 0, 23, 18)
+    day_of_week = st.slider("Day of Week (0 = Mon, 6 = Sun)", 0, 6, 3)
 
     if st.button("Predict"):
         new_data = pd.DataFrame(0, index=[0], columns=electricity_features)
@@ -65,5 +92,30 @@ else:
 
         prediction = electricity_model.predict(new_data)[0]
 
-        st.success(f"Predicted Electricity Usage: {prediction:.2f} kWh")
+        
+        typical_electricity = 1.2 
 
+        st.success(f"⚡ Predicted Electricity Usage: **{prediction:.2f} kWh**")
+
+        
+        fig, ax = plt.subplots()
+        sns.barplot(
+            x=["Typical Usage", "Your Predicted Usage"],
+            y=[typical_electricity, prediction],
+            ax=ax
+        )
+        ax.set_ylabel("kWh")
+        ax.set_title("Electricity Usage Comparison")
+
+        st.pyplot(fig)
+
+        if prediction > typical_electricity:
+            st.warning("Your electricity usage is higher than typical households.")
+        else:
+            st.success("Your electricity usage is within normal limits.")
+
+
+st.divider()
+st.caption(
+    "This system predicts expected household water and electricity usage "
+    "to promote responsible consumption and sustainability.")
